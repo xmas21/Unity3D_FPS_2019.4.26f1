@@ -23,10 +23,8 @@ public class PlayerData : ScriptableObject
     [HideInInspector]
     [Header("角色左右移動速度")]
     public float walkRLSpeed = 3;
-    [HideInInspector]
     [Header("跳躍高度")]
     public float jumpHeight = 6;
-    [HideInInspector]
     [Header("下墜至地面所需時間")]
     public float jumpSmoothTime = 1;
     [Header("角色狀態")]
@@ -41,4 +39,18 @@ public class PlayerData : ScriptableObject
         Crouch,
         Prone
     }
+
+    /// <summary>
+    /// 角色在不同狀態下的參數
+    /// </summary>
+    [System.Serializable]
+    public class ModelSetting
+    {
+        [Header("攝影機高度")]
+        public float CameraHeight;
+        [Header("角色碰撞器")]
+        public CapsuleCollider stateCollider;
+    }
+
 }
+
