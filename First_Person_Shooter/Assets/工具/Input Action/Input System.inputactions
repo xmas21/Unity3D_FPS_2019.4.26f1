@@ -1,5 +1,5 @@
 {
-    "name": "輸入系統",
+    "name": "Input System",
     "maps": [
         {
             "name": "Character",
@@ -18,6 +18,14 @@
                     "type": "PassThrough",
                     "id": "9d5a5862-eed8-4753-97f9-aa78721a8f11",
                     "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Jump",
+                    "type": "Button",
+                    "id": "dd2bfd73-6aab-4402-bfa3-3209a48d2f0a",
+                    "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
                 }
@@ -88,6 +96,17 @@
                     "action": "Movement",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "7f50f8fa-6255-4e0e-9098-87c41c5160af",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "控制器參數", menuName = "Lobo/玩家資料")]
+[CreateAssetMenu(fileName = "控制器參數", menuName = "Lobo/玩家參數")]
 [System.Serializable]
 public class PlayerData : ScriptableObject
 {
@@ -14,10 +14,31 @@ public class PlayerData : ScriptableObject
     [Header("Y 軸反轉")]
     public bool ViewY_inverted;
 
+    [HideInInspector]
     [Header("角色前進移動速度")]
-    public float walkForwardSpeed;
+    public float walkForwardSpeed = 4;
+    [HideInInspector]
     [Header("角色後退移動速度")]
-    public float walkBackwardSpeed;
+    public float walkBackwardSpeed = 2;
+    [HideInInspector]
     [Header("角色左右移動速度")]
-    public float walkRLSpeed;
+    public float walkRLSpeed = 3;
+    [HideInInspector]
+    [Header("跳躍高度")]
+    public float jumpHeight = 6;
+    [HideInInspector]
+    [Header("下墜至地面所需時間")]
+    public float jumpSmoothTime = 1;
+    [Header("角色狀態")]
+    public PlayerState playerStates;
+
+    /// <summary>
+    /// 角色狀態
+    /// </summary>
+    public enum PlayerState
+    {
+        Stand,
+        Crouch,
+        Prone
+    }
 }

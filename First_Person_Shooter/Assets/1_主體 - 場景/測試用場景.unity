@@ -127,7 +127,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-8472
+  m_Name: pb_Mesh14706
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -317,12 +317,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9166fd1feb0d203458e838b3323facdd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  input_Movement: {x: 0, y: 0}
-  input_View: {x: 0, y: 0}
-  viewClamp_XMin: -70
-  viewClamp_XMax: 80
-  playerdata: {fileID: 11400000, guid: 30f77591a353df94293999da24191350, type: 2}
+  viewClamp_YMin: -70
+  viewClamp_YMax: 80
+  gravityValue: 0.05
+  gravity_Min: -3
+  cameraSmoothTime: 0.3
+  cameraStandHeight: 0.7
+  cameraCrouchHeight: 0
+  cameraProneHeight: -0.6
   cameraTransform: {fileID: 1402049375}
+  playerdata: {fileID: 11400000, guid: 30f77591a353df94293999da24191350, type: 2}
 --- !u!143 &662930737
 CharacterController:
   m_ObjectHideFlags: 0
