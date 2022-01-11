@@ -329,6 +329,16 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 55
   playerdata: {fileID: 11400000, guid: 30f77591a353df94293999da24191350, type: 2}
+  playerUnfreeSetting:
+    playerStates: 0
+    walkForwardSpeed: 4
+    walkRLSpeed: 3
+    walkBackwardSpeed: 2
+    runForwardSpeed: 7
+    runRLSpeed: 5
+    movementSmooth: 0.15
+    jumpHeight: 6
+    jumpSmoothTime: 1
   playerStandState:
     CameraHeight: 0.7
     stateCollider: {fileID: 662930738}
@@ -386,7 +396,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 662930735}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.912, y: 1.5, z: 0.913}
+  m_LocalPosition: {x: 0.912, y: 1.5, z: 0.542}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1402049375}

@@ -51,9 +51,33 @@ public class @InputSystem : IInputActionCollection, IDisposable
                     ""interactions"": """"
                 },
                 {
+                    ""name"": ""CrouchRelease"",
+                    ""type"": ""Button"",
+                    ""id"": ""79d8f296-bdf2-47d1-a159-9b7b8d89d00c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
                     ""name"": ""Prone"",
                     ""type"": ""Button"",
                     ""id"": ""442c95ff-d583-47dd-96c7-a7591974b39c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Sprint"",
+                    ""type"": ""Button"",
+                    ""id"": ""a413d526-513d-4199-9be0-559d222fe4e7"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""SprintRelease"",
+                    ""type"": ""Button"",
+                    ""id"": ""c5e6be11-698f-4a63-b1b0-e78c267410f5"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
@@ -158,6 +182,39 @@ public class @InputSystem : IInputActionCollection, IDisposable
                     ""action"": ""Prone"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2693ebbb-a337-4ab5-a188-21e7aebdb5ad"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Sprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1449d82d-4a34-4780-b758-a94fa55d3fb9"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": ""Press(behavior=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SprintRelease"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""25c583c4-bbbc-40d7-83b4-1e8f82da396d"",
+                    ""path"": ""<Keyboard>/ctrl"",
+                    ""interactions"": ""Press(behavior=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CrouchRelease"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -170,7 +227,10 @@ public class @InputSystem : IInputActionCollection, IDisposable
         m_Character_View = m_Character.FindAction("View", throwIfNotFound: true);
         m_Character_Jump = m_Character.FindAction("Jump", throwIfNotFound: true);
         m_Character_Crouch = m_Character.FindAction("Crouch", throwIfNotFound: true);
+        m_Character_CrouchRelease = m_Character.FindAction("CrouchRelease", throwIfNotFound: true);
         m_Character_Prone = m_Character.FindAction("Prone", throwIfNotFound: true);
+        m_Character_Sprint = m_Character.FindAction("Sprint", throwIfNotFound: true);
+        m_Character_SprintRelease = m_Character.FindAction("SprintRelease", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -224,7 +284,10 @@ public class @InputSystem : IInputActionCollection, IDisposable
     private readonly InputAction m_Character_View;
     private readonly InputAction m_Character_Jump;
     private readonly InputAction m_Character_Crouch;
+    private readonly InputAction m_Character_CrouchRelease;
     private readonly InputAction m_Character_Prone;
+    private readonly InputAction m_Character_Sprint;
+    private readonly InputAction m_Character_SprintRelease;
     public struct CharacterActions
     {
         private @InputSystem m_Wrapper;
@@ -233,7 +296,10 @@ public class @InputSystem : IInputActionCollection, IDisposable
         public InputAction @View => m_Wrapper.m_Character_View;
         public InputAction @Jump => m_Wrapper.m_Character_Jump;
         public InputAction @Crouch => m_Wrapper.m_Character_Crouch;
+        public InputAction @CrouchRelease => m_Wrapper.m_Character_CrouchRelease;
         public InputAction @Prone => m_Wrapper.m_Character_Prone;
+        public InputAction @Sprint => m_Wrapper.m_Character_Sprint;
+        public InputAction @SprintRelease => m_Wrapper.m_Character_SprintRelease;
         public InputActionMap Get() { return m_Wrapper.m_Character; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -255,9 +321,18 @@ public class @InputSystem : IInputActionCollection, IDisposable
                 @Crouch.started -= m_Wrapper.m_CharacterActionsCallbackInterface.OnCrouch;
                 @Crouch.performed -= m_Wrapper.m_CharacterActionsCallbackInterface.OnCrouch;
                 @Crouch.canceled -= m_Wrapper.m_CharacterActionsCallbackInterface.OnCrouch;
+                @CrouchRelease.started -= m_Wrapper.m_CharacterActionsCallbackInterface.OnCrouchRelease;
+                @CrouchRelease.performed -= m_Wrapper.m_CharacterActionsCallbackInterface.OnCrouchRelease;
+                @CrouchRelease.canceled -= m_Wrapper.m_CharacterActionsCallbackInterface.OnCrouchRelease;
                 @Prone.started -= m_Wrapper.m_CharacterActionsCallbackInterface.OnProne;
                 @Prone.performed -= m_Wrapper.m_CharacterActionsCallbackInterface.OnProne;
                 @Prone.canceled -= m_Wrapper.m_CharacterActionsCallbackInterface.OnProne;
+                @Sprint.started -= m_Wrapper.m_CharacterActionsCallbackInterface.OnSprint;
+                @Sprint.performed -= m_Wrapper.m_CharacterActionsCallbackInterface.OnSprint;
+                @Sprint.canceled -= m_Wrapper.m_CharacterActionsCallbackInterface.OnSprint;
+                @SprintRelease.started -= m_Wrapper.m_CharacterActionsCallbackInterface.OnSprintRelease;
+                @SprintRelease.performed -= m_Wrapper.m_CharacterActionsCallbackInterface.OnSprintRelease;
+                @SprintRelease.canceled -= m_Wrapper.m_CharacterActionsCallbackInterface.OnSprintRelease;
             }
             m_Wrapper.m_CharacterActionsCallbackInterface = instance;
             if (instance != null)
@@ -274,9 +349,18 @@ public class @InputSystem : IInputActionCollection, IDisposable
                 @Crouch.started += instance.OnCrouch;
                 @Crouch.performed += instance.OnCrouch;
                 @Crouch.canceled += instance.OnCrouch;
+                @CrouchRelease.started += instance.OnCrouchRelease;
+                @CrouchRelease.performed += instance.OnCrouchRelease;
+                @CrouchRelease.canceled += instance.OnCrouchRelease;
                 @Prone.started += instance.OnProne;
                 @Prone.performed += instance.OnProne;
                 @Prone.canceled += instance.OnProne;
+                @Sprint.started += instance.OnSprint;
+                @Sprint.performed += instance.OnSprint;
+                @Sprint.canceled += instance.OnSprint;
+                @SprintRelease.started += instance.OnSprintRelease;
+                @SprintRelease.performed += instance.OnSprintRelease;
+                @SprintRelease.canceled += instance.OnSprintRelease;
             }
         }
     }
@@ -287,6 +371,9 @@ public class @InputSystem : IInputActionCollection, IDisposable
         void OnView(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnCrouch(InputAction.CallbackContext context);
+        void OnCrouchRelease(InputAction.CallbackContext context);
         void OnProne(InputAction.CallbackContext context);
+        void OnSprint(InputAction.CallbackContext context);
+        void OnSprintRelease(InputAction.CallbackContext context);
     }
 }

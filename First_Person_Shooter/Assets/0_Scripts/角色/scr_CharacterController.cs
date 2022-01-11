@@ -21,17 +21,22 @@ public class scr_CharacterController : MonoBehaviour
     public Transform cameraTransform;
     [Header("角色位置的地板點")]
     public Transform feetTransform;
+    [HideInInspector]
     [Header("偵測地圖圖層")]
     public LayerMask environmentMask;
 
     [Header("角色自由性控制器參數")]
     public PlayerData playerdata;
+    [Header("角色非自由性控制器參數")]
+    public PlayerUnfreeSetting playerUnfreeSetting;
     [Header("角色參數 - 站立")]
     public ModelSetting playerStandState;
     [Header("角色參數 - 蹲下")]
     public ModelSetting playerCrouchState;
     [Header("角色參數 - 趴下")]
     public ModelSetting playerProneState;
+
+    private bool isSprint;
 
     private float playerGravity;                       // 玩家重力值
     private float cameraHeight;                        // 攝影機高度
@@ -46,6 +51,8 @@ public class scr_CharacterController : MonoBehaviour
     private Vector3 jumpForce;                         // 跳躍力道
     private Vector3 jumpFallVelocity;                  // 下墜速度 (程式自定義)
     private Vector3 stateCapsuleCenterVelocity;        // 碰撞器座標改變速度 (程式自定義)
+    private Vector3 newMovementSpeed;
+    private Vector3 newMovementSpeedVelocity;
 
     private InputSystem inputSystem;                   // 輸入系統
     private CharacterController characterController;   // 角色內建控制器
@@ -62,52 +69,68 @@ public class scr_CharacterController : MonoBehaviour
         inputSystem.Character.View.performed += p => input_View = p.ReadValue<Vector2>();
         inputSystem.Character.Jump.performed += p => Jump();
         inputSystem.Character.Crouch.performed += p => Crouch();
+        inputSystem.Character.CrouchRelease.performed += p => StopCrouch();
         inputSystem.Character.Prone.performed += p => Prone();
+        inputSystem.Character.Sprint.performed += p => ToggleSprint();
+        inputSystem.Character.SprintRelease.performed += p => StopSprint();
 
         inputSystem.Enable();
 
         newCameraRotation = cameraTransform.localRotation.eulerAngles;
         newCharacterRotation = transform.localRotation.eulerAngles;
-
         cameraHeight = cameraTransform.localPosition.y;
+
     }
 
     private void Update()
     {
-        Move();
-        View();
         CalculateJump();
         CalculateState();
-
+        Move();
+        View();
     }
 
     #region -- 方法 --
+
+    /// <summary>
+    /// 判斷是否可以站起來
+    /// </summary>
+    /// <param name="stateCheckHeight">針對不同狀態的高度</param>
+    /// <returns></returns>
+    private bool StateCheck(float stateCheckHeight)
+    {
+        var start = new Vector3(feetTransform.position.x, feetTransform.position.y + characterController.radius + stateCheckErrorMargin, feetTransform.position.z);                  // 碰撞器下緣 (0.35)
+        var end = new Vector3(feetTransform.position.x, feetTransform.position.y - characterController.radius - stateCheckErrorMargin + stateCheckHeight, feetTransform.position.z); // 碰撞器上緣 (確認的高度-0.35)
+
+        return Physics.CheckCapsule(start, end, characterController.radius, environmentMask);  // 假如 碰撞器下緣 ~ 碰撞器上緣 中間有碰觸到 環境圖層的話 回傳 True
+    }
 
     /// <summary>
     /// 角色移動
     /// </summary>
     private void Move()
     {
-        var verticalSpeed = playerdata.walkForwardSpeed * input_Movement.y * Time.deltaTime;
-        var horizontalSpeed = playerdata.walkRLSpeed * input_Movement.x * Time.deltaTime;
-
-        var newMovementSpeed = new Vector3(horizontalSpeed, 0, verticalSpeed);
-        newMovementSpeed = transform.TransformDirection(newMovementSpeed);  // 調整面向
-
-        if (playerGravity > gravity_Min)
+        if (input_Movement.y <= 0.2f)
         {
-            playerGravity -= gravityValue * Time.deltaTime;
+            isSprint = false;
         }
 
-        if (playerGravity < -0.1f && characterController.isGrounded)
+        var verticalSpeed = playerUnfreeSetting.walkForwardSpeed;
+        var horizontalSpeed = playerUnfreeSetting.walkRLSpeed;
+
+        if (isSprint)                                                       // 判斷是不是跑步中 => 影響 水平/垂直 速度
         {
-            playerGravity = -0.1f;
+            verticalSpeed = playerUnfreeSetting.runForwardSpeed;
+            horizontalSpeed = playerUnfreeSetting.runRLSpeed;
         }
 
-        newMovementSpeed.y += playerGravity;
-        newMovementSpeed += jumpForce * Time.deltaTime;
+        newMovementSpeed = Vector3.SmoothDamp(newMovementSpeed, new Vector3(horizontalSpeed * input_Movement.x * Time.deltaTime, 0, verticalSpeed * input_Movement.y * Time.deltaTime), ref newMovementSpeedVelocity, playerUnfreeSetting.movementSmooth);
+        var movementSpeed = transform.TransformDirection(newMovementSpeed);  // 調整面向
 
-        characterController.Move(newMovementSpeed);
+        movementSpeed.y += playerGravity;
+        movementSpeed += jumpForce * Time.deltaTime;
+
+        characterController.Move(movementSpeed);
     }
 
     /// <summary>
@@ -129,7 +152,17 @@ public class scr_CharacterController : MonoBehaviour
     /// </summary>
     private void CalculateJump()
     {
-        jumpForce = Vector3.SmoothDamp(jumpForce, Vector3.zero, ref jumpFallVelocity, playerdata.jumpSmoothTime);
+        if (playerGravity > gravity_Min)
+        {
+            playerGravity -= gravityValue * Time.deltaTime;
+        }
+
+        if (playerGravity < -0.1f && characterController.isGrounded)
+        {
+            playerGravity = -0.1f;
+        }
+
+        jumpForce = Vector3.SmoothDamp(jumpForce, Vector3.zero, ref jumpFallVelocity, playerUnfreeSetting.jumpSmoothTime);
     }
 
     /// <summary>
@@ -137,12 +170,18 @@ public class scr_CharacterController : MonoBehaviour
     /// </summary>
     private void Jump()
     {
-        if (!characterController.isGrounded) // 假如不再地上 > 跳回
+        if (!characterController.isGrounded || playerUnfreeSetting.playerStates == PlayerState.Prone) // 假如不再地上 > 不執行回傳
         {
             return;
         }
 
-        jumpForce = Vector3.up * playerdata.jumpHeight;
+        if (playerUnfreeSetting.playerStates == PlayerState.Crouch) // 蹲下 & 趴下狀態的話 > 站立 
+        {
+            playerUnfreeSetting.playerStates = PlayerState.Stand;
+            return;
+        }
+
+        jumpForce = Vector3.up * playerUnfreeSetting.jumpHeight;
         playerGravity = 0;
     }
 
@@ -153,11 +192,11 @@ public class scr_CharacterController : MonoBehaviour
     {
         var currentState = playerStandState;
 
-        if (playerdata.playerStates == PlayerData.PlayerState.Crouch)
+        if (playerUnfreeSetting.playerStates == PlayerData.PlayerState.Crouch)
         {
             currentState = playerCrouchState;
         }
-        else if (playerdata.playerStates == PlayerData.PlayerState.Prone)
+        else if (playerUnfreeSetting.playerStates == PlayerData.PlayerState.Prone)
         {
             currentState = playerProneState;
         }
@@ -174,13 +213,13 @@ public class scr_CharacterController : MonoBehaviour
     /// </summary>
     private void Crouch()
     {
-        if (playerdata.playerStates == PlayerState.Crouch)
+        if (playerUnfreeSetting.playerStates == PlayerState.Crouch)
         {
             if (StateCheck(playerStandState.stateCollider.height))
             {
                 return;
             }
-            playerdata.playerStates = PlayerState.Stand;
+            playerUnfreeSetting.playerStates = PlayerState.Stand;
             return;
         }
 
@@ -189,7 +228,22 @@ public class scr_CharacterController : MonoBehaviour
             return;
         }
 
-        playerdata.playerStates = PlayerState.Crouch;
+        playerUnfreeSetting.playerStates = PlayerState.Crouch;
+    }
+
+    /// <summary>
+    /// 放開蹲下
+    /// </summary>
+    private void StopCrouch()
+    {
+        if (StateCheck(playerStandState.stateCollider.height))
+        {
+            return;
+        }
+        else
+        {
+            playerUnfreeSetting.playerStates = PlayerState.Stand;
+        }
     }
 
     /// <summary>
@@ -197,13 +251,13 @@ public class scr_CharacterController : MonoBehaviour
     /// </summary>
     private void Prone()
     {
-        if (playerdata.playerStates == PlayerState.Prone) // 假如狀態為趴下
+        if (playerUnfreeSetting.playerStates == PlayerState.Prone) // 假如狀態為趴下
         {
             if (StateCheck(playerStandState.stateCollider.height)) // 0.35 ~ 1.65 之間有其他物件
             {
                 return;
             }
-            playerdata.playerStates = PlayerState.Stand;
+            playerUnfreeSetting.playerStates = PlayerState.Stand;
             return;
         }
 
@@ -212,20 +266,29 @@ public class scr_CharacterController : MonoBehaviour
             return;
         }
 
-        playerdata.playerStates = PlayerState.Prone;
+        playerUnfreeSetting.playerStates = PlayerState.Prone;
     }
 
     /// <summary>
-    /// 判斷是否可以站起來
+    /// 切換跑步
     /// </summary>
-    /// <param name="stateCheckHeight">針對不同狀態的高度</param>
-    /// <returns></returns>
-    private bool StateCheck(float stateCheckHeight)
+    private void ToggleSprint()
     {
-        var start = new Vector3(feetTransform.position.x, feetTransform.position.y + characterController.radius + stateCheckErrorMargin, feetTransform.position.z);                  // 碰撞器下緣 (0.35)
-        var end = new Vector3(feetTransform.position.x, feetTransform.position.y - characterController.radius - stateCheckErrorMargin + stateCheckHeight, feetTransform.position.z); // 碰撞器上緣 (確認的高度-0.35)
+        if (input_Movement.y <= 0.2f)
+        {
+            isSprint = false;
+            return;
+        }
 
-        return Physics.CheckCapsule(start, end, characterController.radius, environmentMask);  // 假如 碰撞器下緣 ~ 碰撞器上緣 中間有碰觸到 環境圖層的話 回傳 True
+        isSprint = !isSprint;
+    }
+
+    /// <summary>
+    /// 暫停奔跑
+    /// </summary>
+    private void StopSprint()
+    {
+        isSprint = false;
     }
 
     #endregion

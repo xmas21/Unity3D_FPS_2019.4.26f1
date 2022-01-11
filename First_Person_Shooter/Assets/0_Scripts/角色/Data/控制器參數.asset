@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f503d67199be0454781239e9d5e637f6, type: 3}
   m_Name: "\u63A7\u5236\u5668\u53C3\u6578"
   m_EditorClassIdentifier: 
-  ViewX_Sensitivity: 8
-  ViewY_Sensitivity: 5
+  ViewX_Sensitivity: 12
+  ViewY_Sensitivity: 12
   ViewX_inverted: 0
   ViewY_inverted: 0
   walkForwardSpeed: 4
-  walkBackwardSpeed: 2
   walkRLSpeed: 3
+  walkBackwardSpeed: 2
   jumpHeight: 5
   jumpSmoothTime: 0.3
   playerStates: 0
