@@ -10,12 +10,15 @@ public class scr_CharacterController : MonoBehaviour
     [HideInInspector]
     [Header("Y視角上限")]
     public float viewClamp_YMax = 80;
-    [Header("重力值")]
+    [HideInInspector]
+    public Vector2 input_View;                        // 滑鼠視角值
+
+    [Header("環境重力")]
     public float gravityValue = 0.03f;
     [Header("最小重力值")]
     public float gravity_Min = -3;
     [Header("攝影機換位時間")]
-    public float cameraSmoothTime;
+    public float cameraSmoothTime = 0.2f;
 
     [Header("角色攝影機座標系統")]
     public Transform cameraTransform;
@@ -27,6 +30,8 @@ public class scr_CharacterController : MonoBehaviour
 
     [Header("角色自由性控制器參數")]
     public PlayerData playerdata;
+    [Header("武器")]
+    public scr_WeaponController currentWeapon;
     [Header("角色非自由性控制器參數")]
     public PlayerUnfreeSetting playerUnfreeSetting;
     [Header("角色參數 - 站立")]
@@ -43,9 +48,7 @@ public class scr_CharacterController : MonoBehaviour
     private float cameraHeightVelocity;                // 攝影機變換速度 (程式自定義)
     private float stateCapsuleHeightVelocity;          // 碰撞器高度改變速度 (程式自定義)
     private float stateCheckErrorMargin = 0.05f;       // 確認高度額外加的包容值
-
     private Vector2 input_Movement;                    // 鍵盤輸入值
-    private Vector2 input_View;                        // 滑鼠視角值
     private Vector3 newCameraRotation;                 // 攝影機的角度
     private Vector3 newCharacterRotation;              // 角色的角度
     private Vector3 jumpForce;                         // 跳躍力道
@@ -79,6 +82,11 @@ public class scr_CharacterController : MonoBehaviour
         newCameraRotation = cameraTransform.localRotation.eulerAngles;
         newCharacterRotation = transform.localRotation.eulerAngles;
         cameraHeight = cameraTransform.localPosition.y;
+
+        if (currentWeapon)
+        {
+            currentWeapon.Initialise(this);
+        }
 
     }
 
@@ -124,7 +132,28 @@ public class scr_CharacterController : MonoBehaviour
             horizontalSpeed = playerUnfreeSetting.runRLSpeed;
         }
 
-        newMovementSpeed = Vector3.SmoothDamp(newMovementSpeed, new Vector3(horizontalSpeed * input_Movement.x * Time.deltaTime, 0, verticalSpeed * input_Movement.y * Time.deltaTime), ref newMovementSpeedVelocity, playerUnfreeSetting.movementSmooth);
+        // * Effectors
+        if (!characterController.isGrounded)
+        {
+            playerUnfreeSetting.speedEffector = playerUnfreeSetting.fallSpeedEffector;
+        }
+        else if (playerUnfreeSetting.playerStates == PlayerState.Crouch)
+        {
+            playerUnfreeSetting.speedEffector = playerUnfreeSetting.crouchSpeedEffector;
+        }
+        else if (playerUnfreeSetting.playerStates == PlayerState.Prone)
+        {
+            playerUnfreeSetting.speedEffector = playerUnfreeSetting.proneSpeedEffector;
+        }
+        else
+        {
+            playerUnfreeSetting.speedEffector = 1;
+        }
+
+        verticalSpeed *= playerUnfreeSetting.speedEffector;
+        horizontalSpeed *= playerUnfreeSetting.speedEffector;
+
+        newMovementSpeed = Vector3.SmoothDamp(newMovementSpeed, new Vector3(horizontalSpeed * input_Movement.x * Time.deltaTime, 0, verticalSpeed * input_Movement.y * Time.deltaTime), ref newMovementSpeedVelocity, characterController.isGrounded ? playerUnfreeSetting.movementSmooth : playerUnfreeSetting.fallingSmooth);
         var movementSpeed = transform.TransformDirection(newMovementSpeed);  // 調整面向
 
         movementSpeed.y += playerGravity;
@@ -175,8 +204,13 @@ public class scr_CharacterController : MonoBehaviour
             return;
         }
 
-        if (playerUnfreeSetting.playerStates == PlayerState.Crouch) // 蹲下 & 趴下狀態的話 > 站立 
+        if (playerUnfreeSetting.playerStates == PlayerState.Crouch)                                   // 蹲下 & 趴下狀態的話 > 站立 
         {
+            if (StateCheck(playerStandState.stateCollider.height))
+            {
+                return;
+            }
+
             playerUnfreeSetting.playerStates = PlayerState.Stand;
             return;
         }

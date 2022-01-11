@@ -5,9 +5,9 @@
 public class PlayerData : ScriptableObject
 {
     [Header("X 軸靈敏度"), Range(0, 50)]
-    public float ViewX_Sensitivity;
+    public float ViewX_Sensitivity = 12;
     [Header("Y 軸靈敏度"), Range(0, 50)]
-    public float ViewY_Sensitivity;
+    public float ViewY_Sensitivity = 12;
 
     [Header("X 軸反轉")]
     public bool ViewX_inverted;
@@ -31,16 +31,27 @@ public class PlayerData : ScriptableObject
         public float walkBackwardSpeed = 2;
 
         [Header("跑步 - 前進速度")]
-        public float runForwardSpeed;
+        public float runForwardSpeed = 7;
         [Header("跑步 - 左右速度")]
-        public float runRLSpeed;
+        public float runRLSpeed = 5;
         [Header("跑步 - 切換滑順時間")]
-        public float movementSmooth;
+        public float movementSmooth = 1.5f;
 
         [Header("跳躍高度")]
         public float jumpHeight = 6;
         [Header("下墜至地面所需時間")]
         public float jumpSmoothTime = 1;
+        [Header("讓下墜變滑順")]
+        public float fallingSmooth = 0.3f;
+
+        [Header("目前速度倍率")]
+        public float speedEffector = 1;
+        [Header("蹲下 - 速度倍率")]
+        public float crouchSpeedEffector = 0.8f;
+        [Header("趴下 - 速度倍率")]
+        public float proneSpeedEffector = 0.4f;
+        [Header("下墜 - 速度倍率")]
+        public float fallSpeedEffector = 0.6f;
 
     }
 
