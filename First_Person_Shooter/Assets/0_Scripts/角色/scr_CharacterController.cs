@@ -12,6 +12,8 @@ public class scr_CharacterController : MonoBehaviour
     public float viewClamp_YMax = 80;
     [HideInInspector]
     public Vector2 input_View;                        // 滑鼠視角值
+    [HideInInspector]
+    public Vector2 input_Movement;                    // 鍵盤輸入值
 
     [Header("環境重力")]
     public float gravityValue = 0.03f;
@@ -48,7 +50,6 @@ public class scr_CharacterController : MonoBehaviour
     private float cameraHeightVelocity;                // 攝影機變換速度 (程式自定義)
     private float stateCapsuleHeightVelocity;          // 碰撞器高度改變速度 (程式自定義)
     private float stateCheckErrorMargin = 0.05f;       // 確認高度額外加的包容值
-    private Vector2 input_Movement;                    // 鍵盤輸入值
     private Vector3 newCameraRotation;                 // 攝影機的角度
     private Vector3 newCharacterRotation;              // 角色的角度
     private Vector3 jumpForce;                         // 跳躍力道
