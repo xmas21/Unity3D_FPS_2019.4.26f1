@@ -5,30 +5,31 @@ public class scr_CharacterController : MonoBehaviour
 {
     #region -- 欄位 -- 
     [HideInInspector]
-    [Header("Y視角下限")]
-    public float viewClamp_YMin = -70;
+    public float gravityValue = 0.03f;                // 環境重力
     [HideInInspector]
-    [Header("Y視角上限")]
-    public float viewClamp_YMax = 80;
+    public float gravity_Min = -3;                    // 最小重力值
+    [HideInInspector]
+    public float cameraSmoothTime = 0.2f;             // 攝影機換位時間
+    [HideInInspector]
+    public float viewClamp_YMin = -70;                // Y視角下限
+    [HideInInspector]
+    public float viewClamp_YMax = 80;                 // Y視角上限
+    [HideInInspector]
+    public float weaponAnimationSpeed;                // 武器動畫速度
+    [HideInInspector]
+    public bool isSprint;                             // 是否跑步中
+
     [HideInInspector]
     public Vector2 input_View;                        // 滑鼠視角值
     [HideInInspector]
     public Vector2 input_Movement;                    // 鍵盤輸入值
-
-    [Header("環境重力")]
-    public float gravityValue = 0.03f;
-    [Header("最小重力值")]
-    public float gravity_Min = -3;
-    [Header("攝影機換位時間")]
-    public float cameraSmoothTime = 0.2f;
+    [HideInInspector]
+    public LayerMask environmentMask;                 // 偵測地圖圖層
 
     [Header("角色攝影機座標系統")]
     public Transform cameraTransform;
     [Header("角色位置的地板點")]
     public Transform feetTransform;
-    [HideInInspector]
-    [Header("偵測地圖圖層")]
-    public LayerMask environmentMask;
 
     [Header("角色自由性控制器參數")]
     public PlayerData playerdata;
@@ -43,7 +44,6 @@ public class scr_CharacterController : MonoBehaviour
     [Header("角色參數 - 趴下")]
     public ModelSetting playerProneState;
 
-    private bool isSprint;
 
     private float playerGravity;                       // 玩家重力值
     private float cameraHeight;                        // 攝影機高度
@@ -149,6 +149,13 @@ public class scr_CharacterController : MonoBehaviour
         else
         {
             playerUnfreeSetting.speedEffector = 1;
+        }
+
+        weaponAnimationSpeed = characterController.velocity.magnitude / (playerUnfreeSetting.walkForwardSpeed * playerUnfreeSetting.speedEffector);
+
+        if (weaponAnimationSpeed >= 1)
+        {
+            weaponAnimationSpeed = 1;
         }
 
         verticalSpeed *= playerUnfreeSetting.speedEffector;

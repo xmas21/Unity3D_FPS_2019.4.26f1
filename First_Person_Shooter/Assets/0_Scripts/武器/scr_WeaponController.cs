@@ -9,19 +9,22 @@ public class scr_WeaponController : MonoBehaviour
 
     private bool isInitialised;  // 是否初始化
 
-    private Vector3 newWeaponRotation;              // 武器座標
-    private Vector3 newWeaponRotationVelocity;      // 武器座標變換速度 (程式自定義)
-
-    private Vector3 targetWeaponRotation;           // 計算座標
-    private Vector3 targetWeaponRotationVelocity;   // 計算座標變換速度 (程式自定義)
-
+    private Vector3 newWeaponRotation;                      // 武器座標
+    private Vector3 newWeaponRotationVelocity;              // 武器座標變換速度 (程式自定義)
+    private Vector3 targetWeaponRotation;                   // 計算座標
+    private Vector3 targetWeaponRotationVelocity;           // 計算座標變換速度 (程式自定義)
     private Vector3 newWeaponMovementRotation;              // 武器座標
     private Vector3 newWeaponMovementRotationVelocity;      // 武器座標變換速度 (程式自定義)
-
     private Vector3 targetWeaponMovementRotation;           // 計算座標
     private Vector3 targetWeaponMovementRotationVelocity;   // 計算座標變換速度 (程式自定義)
 
     private scr_CharacterController characterController;
+    private Animator ani;
+
+    private void Awake()
+    {
+        ani = transform.GetChild(0).GetComponent<Animator>();
+    }
 
     private void Start()
     {
@@ -35,12 +38,16 @@ public class scr_WeaponController : MonoBehaviour
             return;
         }
 
+        ani.speed = characterController.weaponAnimationSpeed;
+
         GunSway();
+        SetWeaponAnimation();
     }
 
     /// <summary>
-    /// 初始化
+    /// 初始化 => 幫忙抓取腳本
     /// </summary>
+    /// <param name="CharacterController"></param>
     public void Initialise(scr_CharacterController CharacterController)
     {
         characterController = CharacterController;
@@ -71,6 +78,14 @@ public class scr_WeaponController : MonoBehaviour
         newWeaponMovementRotation = Vector3.SmoothDamp(newWeaponMovementRotation, targetWeaponMovementRotation, ref newWeaponMovementRotationVelocity, weaponSetting.movemenSwaySmooth);
 
         transform.localRotation = Quaternion.Euler(newWeaponRotation + newWeaponMovementRotation);
+    }
+
+    /// <summary>
+    /// 設定動畫切換
+    /// </summary>
+    private void SetWeaponAnimation()
+    {
+        ani.SetBool("isSpirint", characterController.isSprint);
     }
 
 }
