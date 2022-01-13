@@ -18,6 +18,10 @@ public class scr_CharacterController : MonoBehaviour
     public float weaponAnimationSpeed;                // 武器動畫速度
     [HideInInspector]
     public bool isSprint;                             // 是否跑步中
+    [HideInInspector]
+    public bool isGround;                             // 是否在地上
+    [HideInInspector]
+    public bool isFalling;                            // 是否下墜中
 
     [HideInInspector]
     public Vector2 input_View;                        // 滑鼠視角值
@@ -25,6 +29,8 @@ public class scr_CharacterController : MonoBehaviour
     public Vector2 input_Movement;                    // 鍵盤輸入值
     [HideInInspector]
     public LayerMask environmentMask;                 // 偵測地圖圖層
+    [HideInInspector]
+    public LayerMask groundMask;                      // 偵測地版圖層
 
     [Header("角色攝影機座標系統")]
     public Transform cameraTransform;
@@ -97,6 +103,13 @@ public class scr_CharacterController : MonoBehaviour
         CalculateState();
         Move();
         View();
+        SetIsFalling();
+        SetIsGrounded();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(feetTransform.position, playerUnfreeSetting.groundDetectRadius);
     }
 
     #region -- 方法 --
@@ -134,7 +147,7 @@ public class scr_CharacterController : MonoBehaviour
         }
 
         // * Effectors
-        if (!characterController.isGrounded)
+        if (!isGround)
         {
             playerUnfreeSetting.speedEffector = playerUnfreeSetting.fallSpeedEffector;
         }
@@ -161,7 +174,7 @@ public class scr_CharacterController : MonoBehaviour
         verticalSpeed *= playerUnfreeSetting.speedEffector;
         horizontalSpeed *= playerUnfreeSetting.speedEffector;
 
-        newMovementSpeed = Vector3.SmoothDamp(newMovementSpeed, new Vector3(horizontalSpeed * input_Movement.x * Time.deltaTime, 0, verticalSpeed * input_Movement.y * Time.deltaTime), ref newMovementSpeedVelocity, characterController.isGrounded ? playerUnfreeSetting.movementSmooth : playerUnfreeSetting.fallingSmooth);
+        newMovementSpeed = Vector3.SmoothDamp(newMovementSpeed, new Vector3(horizontalSpeed * input_Movement.x * Time.deltaTime, 0, verticalSpeed * input_Movement.y * Time.deltaTime), ref newMovementSpeedVelocity, isGround ? playerUnfreeSetting.movementSmooth : playerUnfreeSetting.fallingSmooth);
         var movementSpeed = transform.TransformDirection(newMovementSpeed);  // 調整面向
 
         movementSpeed.y += playerGravity;
@@ -194,7 +207,7 @@ public class scr_CharacterController : MonoBehaviour
             playerGravity -= gravityValue * Time.deltaTime;
         }
 
-        if (playerGravity < -0.1f && characterController.isGrounded)
+        if (playerGravity < -0.1f && isGround)
         {
             playerGravity = -0.1f;
         }
@@ -207,7 +220,7 @@ public class scr_CharacterController : MonoBehaviour
     /// </summary>
     private void Jump()
     {
-        if (!characterController.isGrounded || playerUnfreeSetting.playerStates == PlayerState.Prone) // 假如不再地上 > 不執行回傳
+        if (!isGround || playerUnfreeSetting.playerStates == PlayerState.Prone) // 假如不再地上 > 不執行回傳
         {
             return;
         }
@@ -225,6 +238,8 @@ public class scr_CharacterController : MonoBehaviour
 
         jumpForce = Vector3.up * playerUnfreeSetting.jumpHeight;
         playerGravity = 0;
+
+        currentWeapon.TriggerJump();
     }
 
     /// <summary>
@@ -331,6 +346,25 @@ public class scr_CharacterController : MonoBehaviour
     private void StopSprint()
     {
         isSprint = false;
+    }
+
+    /// <summary>
+    /// 偵測是否在地上
+    /// </summary>
+    private void SetIsGrounded()
+    {
+        isGround = Physics.CheckSphere(feetTransform.position, playerUnfreeSetting.groundDetectRadius, groundMask);
+    }
+
+    /// <summary>
+    /// 偵測是否在下墜
+    /// </summary>
+    private void SetIsFalling()
+    {
+        if (!isGround && characterController.velocity.magnitude > playerUnfreeSetting.fallingSpeed)
+        {
+            isFalling = true;
+        }
     }
 
     #endregion

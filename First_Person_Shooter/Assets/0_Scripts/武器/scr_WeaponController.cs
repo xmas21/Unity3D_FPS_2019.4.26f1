@@ -9,6 +9,11 @@ public class scr_WeaponController : MonoBehaviour
 
     private bool isInitialised;  // 是否初始化
 
+    private bool isGroundedTrigger;
+    private bool isFallingTrigger;
+
+    private float fallingDelay;
+
     private Vector3 newWeaponRotation;                      // 武器座標
     private Vector3 newWeaponRotationVelocity;              // 武器座標變換速度 (程式自定義)
     private Vector3 targetWeaponRotation;                   // 計算座標
@@ -38,20 +43,28 @@ public class scr_WeaponController : MonoBehaviour
             return;
         }
 
-        ani.speed = characterController.weaponAnimationSpeed;
-
-        GunSway();
         SetWeaponAnimation();
+        GunSway();
     }
 
     /// <summary>
     /// 初始化 => 幫忙抓取腳本
     /// </summary>
-    /// <param name="CharacterController"></param>
+    /// <param name="CharacterController">角色控制器的腳本</param>
     public void Initialise(scr_CharacterController CharacterController)
     {
         characterController = CharacterController;
         isInitialised = true;
+    }
+
+    /// <summary>
+    /// 跳躍觸發器
+    /// </summary>
+    public void TriggerJump()
+    {
+        isGroundedTrigger = false;
+        isFallingTrigger = true;
+        ani.SetTrigger("Jump");
     }
 
     /// <summary>
@@ -85,7 +98,29 @@ public class scr_WeaponController : MonoBehaviour
     /// </summary>
     private void SetWeaponAnimation()
     {
-        ani.SetBool("isSpirint", characterController.isSprint);
-    }
+        if (isGroundedTrigger)
+        {
+            fallingDelay = 0;
+        }
+        else
+        {
+            fallingDelay += Time.deltaTime;
+        }
 
+        if (characterController.isGround && !isGroundedTrigger && fallingDelay > 0.1f)
+        {
+            ani.SetTrigger("Land");
+            isGroundedTrigger = true;
+        }
+
+        if (!characterController.isGround && isGroundedTrigger || !characterController.isGround && isFallingTrigger )
+        {
+            ani.SetTrigger("Fall");
+            isGroundedTrigger = false;
+            isFallingTrigger = false;
+        }
+
+        ani.SetBool("isSpirint", characterController.isSprint);
+        ani.SetFloat("weaponAnimationSpeed", characterController.weaponAnimationSpeed);
+    }
 }

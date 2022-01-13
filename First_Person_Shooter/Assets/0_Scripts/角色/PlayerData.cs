@@ -53,6 +53,11 @@ public class PlayerData : ScriptableObject
         [Header("下墜 - 速度倍率")]
         public float fallSpeedEffector = 0.6f;
 
+        [Header("著地偵測器")]
+        public float groundDetectRadius;
+        [Header("下墜速度")]
+        public float fallingSpeed;
+
     }
 
     /// <summary>
