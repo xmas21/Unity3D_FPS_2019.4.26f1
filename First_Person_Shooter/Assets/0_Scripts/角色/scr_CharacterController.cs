@@ -23,6 +23,8 @@ public class scr_CharacterController : MonoBehaviour
     [HideInInspector]
     public bool isFalling;                            // 是否下墜中
 
+    public bool isAiming;                             // 是否瞄準中
+
     [HideInInspector]
     public Vector2 input_View;                        // 滑鼠視角值
     [HideInInspector]
@@ -50,12 +52,12 @@ public class scr_CharacterController : MonoBehaviour
     [Header("角色參數 - 趴下")]
     public ModelSetting playerProneState;
 
-
     private float playerGravity;                       // 玩家重力值
     private float cameraHeight;                        // 攝影機高度
     private float cameraHeightVelocity;                // 攝影機變換速度 (程式自定義)
     private float stateCapsuleHeightVelocity;          // 碰撞器高度改變速度 (程式自定義)
     private float stateCheckErrorMargin = 0.05f;       // 確認高度額外加的包容值
+
     private Vector3 newCameraRotation;                 // 攝影機的角度
     private Vector3 newCharacterRotation;              // 角色的角度
     private Vector3 jumpForce;                         // 跳躍力道
@@ -84,6 +86,9 @@ public class scr_CharacterController : MonoBehaviour
         inputSystem.Character.Sprint.performed += p => ToggleSprint();
         inputSystem.Character.SprintRelease.performed += p => StopSprint();
 
+        inputSystem.Weapon.Fire2Press.performed += p => AimingPressed();
+        inputSystem.Weapon.Fire2Release.performed += p => AimingReleased();
+
         inputSystem.Enable();
 
         newCameraRotation = cameraTransform.localRotation.eulerAngles;
@@ -105,6 +110,7 @@ public class scr_CharacterController : MonoBehaviour
         View();
         SetIsFalling();
         SetIsGrounded();
+        CalculateAiming();
     }
 
     private void OnDrawGizmos()
@@ -365,6 +371,36 @@ public class scr_CharacterController : MonoBehaviour
         {
             isFalling = true;
         }
+    }
+
+    /// <summary>
+    /// 按下滑鼠左鍵
+    /// </summary>
+    private void AimingPressed()
+    {
+        isAiming = true;
+    }
+
+    /// <summary>
+    /// 放開滑鼠左鍵
+    /// </summary>
+    private void AimingReleased()
+    {
+        isAiming = false;
+    }
+
+    /// <summary>
+    /// 計算瞄準
+    /// </summary>
+    private void CalculateAiming()
+    {
+        if (!currentWeapon)
+        {
+            return;
+        }
+
+        currentWeapon.isAiming = isAiming;
+
     }
 
     #endregion

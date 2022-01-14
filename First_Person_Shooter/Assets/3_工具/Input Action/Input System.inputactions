@@ -204,6 +204,52 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Weapon",
+            "id": "9ee2770c-346d-4598-a24d-0438397a6ccd",
+            "actions": [
+                {
+                    "name": "Fire2Press",
+                    "type": "Button",
+                    "id": "c3854a0d-4fcc-4dd0-8116-c0650c7478a7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Fire2Release",
+                    "type": "Button",
+                    "id": "25b5be81-c95b-4e80-95be-7afc80f8a93e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "8f0d86c3-9e5c-4a9a-8fe6-491ca4216a86",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Fire2Press",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bb34145d-8c15-4eff-b71b-fa8b935b44c4",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Fire2Release",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

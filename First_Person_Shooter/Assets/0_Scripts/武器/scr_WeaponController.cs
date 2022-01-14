@@ -3,17 +3,38 @@ using static data_WeaponData;
 
 public class scr_WeaponController : MonoBehaviour
 {
-
     [Header("武器設定值")]
     public WeaponSetting weaponSetting;
 
-    private bool isInitialised;  // 是否初始化
+    [Header("呼吸 - 武器搖擺物件")]
+    public Vector3 swayPosition;
+    [Header("移動 - 武器搖擺物件")]
+    public Transform weaponSwayObject;
+    [Header("瞄準視角")]
+    public Transform sightTarget;
 
-    private bool isGroundedTrigger;
-    private bool isFallingTrigger;
+    [Header("曲線參數分母 > 影響擺幅")]
+    public float breathSwayScale = 300;
 
-    private float fallingDelay;
+    [HideInInspector]
+    public bool isAiming;                       // 是否瞄準中
+    [HideInInspector]
+    public float sightOffset;                   // 瞄準視角位移
+    [HideInInspector]
+    public float aimingTime;                    // 瞄準視角時間
 
+    private bool isInitialised;                 // 是否初始化
+    private bool isGroundedTrigger;             // 著地觸發器
+    private bool isFallingTrigger;              // 下降觸發器
+
+    private float breathSwayValue_A = 1;        // 利薩茹曲線參數 A
+    private float breathSwayValue_B = 2;        // 利薩茹曲線參數 B
+    private float fallingDelay;                 // 下墜判斷延遲
+    private float breathSwayLerpSpeed = 20;     // Lerp 參數
+    private float breathSwayTime;               // 曲線時間參數 > 不設值僅宣告
+
+    private Vector3 weaponSwayPosition;                     // 武器搖擺座標
+    private Vector3 weaponSwayPositionVelocity;             // 武器搖擺座標
     private Vector3 newWeaponRotation;                      // 武器座標
     private Vector3 newWeaponRotationVelocity;              // 武器座標變換速度 (程式自定義)
     private Vector3 targetWeaponRotation;                   // 計算座標
@@ -28,7 +49,7 @@ public class scr_WeaponController : MonoBehaviour
 
     private void Awake()
     {
-        ani = transform.GetChild(0).GetComponent<Animator>();
+        ani = transform.GetChild(0).GetChild(0).GetComponent<Animator>();
     }
 
     private void Start()
@@ -45,6 +66,20 @@ public class scr_WeaponController : MonoBehaviour
 
         SetWeaponAnimation();
         GunSway();
+        CalculateWeaponbreathSway();
+        CalculateAiming();
+    }
+
+    /// <summary>
+    /// 利薩茹曲線
+    /// </summary>
+    /// <param name="Time"> 參數 : 不設定數值 </param>
+    /// <param name="A"> 曲線參數 A </param>
+    /// <param name="B"> 曲線參數 B </param>
+    /// <returns></returns>
+    private Vector3 LissajousCurve(float Time, float A, float B)
+    {
+        return new Vector3(Mathf.Sin(Time), A * Mathf.Sin(B * Time + Mathf.PI));
     }
 
     /// <summary>
@@ -113,7 +148,7 @@ public class scr_WeaponController : MonoBehaviour
             isGroundedTrigger = true;
         }
 
-        if (!characterController.isGround && isGroundedTrigger || !characterController.isGround && isFallingTrigger )
+        if (!characterController.isGround && isGroundedTrigger || !characterController.isGround && isFallingTrigger)
         {
             ani.SetTrigger("Fall");
             isGroundedTrigger = false;
@@ -122,5 +157,40 @@ public class scr_WeaponController : MonoBehaviour
 
         ani.SetBool("isSpirint", characterController.isSprint);
         ani.SetFloat("weaponAnimationSpeed", characterController.weaponAnimationSpeed);
+    }
+
+    /// <summary>
+    /// 呼吸武器搖擺
+    /// </summary>
+    private void CalculateWeaponbreathSway()
+    {
+        var targetPosition = LissajousCurve(breathSwayTime, breathSwayValue_A, breathSwayValue_B) / breathSwayScale;
+
+        swayPosition = Vector3.Lerp(swayPosition, targetPosition, Time.smoothDeltaTime * breathSwayLerpSpeed);
+        breathSwayTime += Time.deltaTime;
+
+        if (breathSwayTime > 6.3f)
+        {
+            breathSwayTime = 0;
+        }
+
+        // weaponSwayObject.localPosition = swayPosition;
+    }
+
+    /// <summary>
+    /// 計算瞄準
+    /// </summary>
+    private void CalculateAiming()
+    {
+        var targetPosition = transform.position;
+
+        if (isAiming)
+        {
+            targetPosition = characterController.cameraTransform.transform.position + (weaponSwayObject.transform.position - sightTarget.transform.position) + (characterController.cameraTransform.transform.forward * sightOffset);
+        }
+
+        weaponSwayPosition = weaponSwayObject.transform.position;
+        weaponSwayPosition = Vector3.SmoothDamp(weaponSwayPosition, targetPosition, ref weaponSwayPositionVelocity, aimingTime);
+        weaponSwayObject.transform.position = weaponSwayPosition;
     }
 }

@@ -1,4 +1,4 @@
-// GENERATED AUTOMATICALLY FROM 'Assets/工具/Input Action/Input System.inputactions'
+// GENERATED AUTOMATICALLY FROM 'Assets/3_工具/Input Action/Input System.inputactions'
 
 using System;
 using System.Collections;
@@ -217,6 +217,52 @@ public class @InputSystem : IInputActionCollection, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Weapon"",
+            ""id"": ""9ee2770c-346d-4598-a24d-0438397a6ccd"",
+            ""actions"": [
+                {
+                    ""name"": ""Fire2Press"",
+                    ""type"": ""Button"",
+                    ""id"": ""c3854a0d-4fcc-4dd0-8116-c0650c7478a7"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Fire2Release"",
+                    ""type"": ""Button"",
+                    ""id"": ""25b5be81-c95b-4e80-95be-7afc80f8a93e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""8f0d86c3-9e5c-4a9a-8fe6-491ca4216a86"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": ""Press"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Fire2Press"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""bb34145d-8c15-4eff-b71b-fa8b935b44c4"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": ""Press(behavior=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Fire2Release"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -231,6 +277,10 @@ public class @InputSystem : IInputActionCollection, IDisposable
         m_Character_Prone = m_Character.FindAction("Prone", throwIfNotFound: true);
         m_Character_Sprint = m_Character.FindAction("Sprint", throwIfNotFound: true);
         m_Character_SprintRelease = m_Character.FindAction("SprintRelease", throwIfNotFound: true);
+        // Weapon
+        m_Weapon = asset.FindActionMap("Weapon", throwIfNotFound: true);
+        m_Weapon_Fire2Press = m_Weapon.FindAction("Fire2Press", throwIfNotFound: true);
+        m_Weapon_Fire2Release = m_Weapon.FindAction("Fire2Release", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -365,6 +415,47 @@ public class @InputSystem : IInputActionCollection, IDisposable
         }
     }
     public CharacterActions @Character => new CharacterActions(this);
+
+    // Weapon
+    private readonly InputActionMap m_Weapon;
+    private IWeaponActions m_WeaponActionsCallbackInterface;
+    private readonly InputAction m_Weapon_Fire2Press;
+    private readonly InputAction m_Weapon_Fire2Release;
+    public struct WeaponActions
+    {
+        private @InputSystem m_Wrapper;
+        public WeaponActions(@InputSystem wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Fire2Press => m_Wrapper.m_Weapon_Fire2Press;
+        public InputAction @Fire2Release => m_Wrapper.m_Weapon_Fire2Release;
+        public InputActionMap Get() { return m_Wrapper.m_Weapon; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(WeaponActions set) { return set.Get(); }
+        public void SetCallbacks(IWeaponActions instance)
+        {
+            if (m_Wrapper.m_WeaponActionsCallbackInterface != null)
+            {
+                @Fire2Press.started -= m_Wrapper.m_WeaponActionsCallbackInterface.OnFire2Press;
+                @Fire2Press.performed -= m_Wrapper.m_WeaponActionsCallbackInterface.OnFire2Press;
+                @Fire2Press.canceled -= m_Wrapper.m_WeaponActionsCallbackInterface.OnFire2Press;
+                @Fire2Release.started -= m_Wrapper.m_WeaponActionsCallbackInterface.OnFire2Release;
+                @Fire2Release.performed -= m_Wrapper.m_WeaponActionsCallbackInterface.OnFire2Release;
+                @Fire2Release.canceled -= m_Wrapper.m_WeaponActionsCallbackInterface.OnFire2Release;
+            }
+            m_Wrapper.m_WeaponActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @Fire2Press.started += instance.OnFire2Press;
+                @Fire2Press.performed += instance.OnFire2Press;
+                @Fire2Press.canceled += instance.OnFire2Press;
+                @Fire2Release.started += instance.OnFire2Release;
+                @Fire2Release.performed += instance.OnFire2Release;
+                @Fire2Release.canceled += instance.OnFire2Release;
+            }
+        }
+    }
+    public WeaponActions @Weapon => new WeaponActions(this);
     public interface ICharacterActions
     {
         void OnMovement(InputAction.CallbackContext context);
@@ -375,5 +466,10 @@ public class @InputSystem : IInputActionCollection, IDisposable
         void OnProne(InputAction.CallbackContext context);
         void OnSprint(InputAction.CallbackContext context);
         void OnSprintRelease(InputAction.CallbackContext context);
+    }
+    public interface IWeaponActions
+    {
+        void OnFire2Press(InputAction.CallbackContext context);
+        void OnFire2Release(InputAction.CallbackContext context);
     }
 }
