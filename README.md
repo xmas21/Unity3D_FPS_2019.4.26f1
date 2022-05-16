@@ -2,5 +2,6 @@
 
 ## Control  
 WASD : Control player's movement  
-leftmouse : Shoot  
-
+Space : Jump  
+Control : Crouch  
+C : Prone  
