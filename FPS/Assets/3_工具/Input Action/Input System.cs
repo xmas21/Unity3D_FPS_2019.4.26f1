@@ -81,6 +81,14 @@ public class @InputSystem : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""Setting"",
+                    ""type"": ""Button"",
+                    ""id"": ""b6f0c195-cd59-4323-8ebc-7457b825942a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -215,6 +223,17 @@ public class @InputSystem : IInputActionCollection, IDisposable
                     ""action"": ""CrouchRelease"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""55adadeb-3fc7-4118-bf84-92ba35cf7856"",
+                    ""path"": ""<Keyboard>/p"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Setting"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -277,6 +296,7 @@ public class @InputSystem : IInputActionCollection, IDisposable
         m_Character_Prone = m_Character.FindAction("Prone", throwIfNotFound: true);
         m_Character_Sprint = m_Character.FindAction("Sprint", throwIfNotFound: true);
         m_Character_SprintRelease = m_Character.FindAction("SprintRelease", throwIfNotFound: true);
+        m_Character_Setting = m_Character.FindAction("Setting", throwIfNotFound: true);
         // Weapon
         m_Weapon = asset.FindActionMap("Weapon", throwIfNotFound: true);
         m_Weapon_Fire2Press = m_Weapon.FindAction("Fire2Press", throwIfNotFound: true);
@@ -338,6 +358,7 @@ public class @InputSystem : IInputActionCollection, IDisposable
     private readonly InputAction m_Character_Prone;
     private readonly InputAction m_Character_Sprint;
     private readonly InputAction m_Character_SprintRelease;
+    private readonly InputAction m_Character_Setting;
     public struct CharacterActions
     {
         private @InputSystem m_Wrapper;
@@ -350,6 +371,7 @@ public class @InputSystem : IInputActionCollection, IDisposable
         public InputAction @Prone => m_Wrapper.m_Character_Prone;
         public InputAction @Sprint => m_Wrapper.m_Character_Sprint;
         public InputAction @SprintRelease => m_Wrapper.m_Character_SprintRelease;
+        public InputAction @Setting => m_Wrapper.m_Character_Setting;
         public InputActionMap Get() { return m_Wrapper.m_Character; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -383,6 +405,9 @@ public class @InputSystem : IInputActionCollection, IDisposable
                 @SprintRelease.started -= m_Wrapper.m_CharacterActionsCallbackInterface.OnSprintRelease;
                 @SprintRelease.performed -= m_Wrapper.m_CharacterActionsCallbackInterface.OnSprintRelease;
                 @SprintRelease.canceled -= m_Wrapper.m_CharacterActionsCallbackInterface.OnSprintRelease;
+                @Setting.started -= m_Wrapper.m_CharacterActionsCallbackInterface.OnSetting;
+                @Setting.performed -= m_Wrapper.m_CharacterActionsCallbackInterface.OnSetting;
+                @Setting.canceled -= m_Wrapper.m_CharacterActionsCallbackInterface.OnSetting;
             }
             m_Wrapper.m_CharacterActionsCallbackInterface = instance;
             if (instance != null)
@@ -411,6 +436,9 @@ public class @InputSystem : IInputActionCollection, IDisposable
                 @SprintRelease.started += instance.OnSprintRelease;
                 @SprintRelease.performed += instance.OnSprintRelease;
                 @SprintRelease.canceled += instance.OnSprintRelease;
+                @Setting.started += instance.OnSetting;
+                @Setting.performed += instance.OnSetting;
+                @Setting.canceled += instance.OnSetting;
             }
         }
     }
@@ -466,6 +494,7 @@ public class @InputSystem : IInputActionCollection, IDisposable
         void OnProne(InputAction.CallbackContext context);
         void OnSprint(InputAction.CallbackContext context);
         void OnSprintRelease(InputAction.CallbackContext context);
+        void OnSetting(InputAction.CallbackContext context);
     }
     public interface IWeaponActions
     {

@@ -51,6 +51,10 @@ public class scr_CharacterController : MonoBehaviour
     public ModelSetting playerCrouchState;
     [Header("角色參數 - 趴下")]
     public ModelSetting playerProneState;
+    [Header("設定畫面")]
+    public GameObject settingPage;
+
+    public bool isSetting;
 
     private float playerGravity;                       // 玩家重力值
     private float cameraHeight;                        // 攝影機高度
@@ -85,6 +89,7 @@ public class scr_CharacterController : MonoBehaviour
         inputSystem.Character.Prone.performed += p => Prone();
         inputSystem.Character.Sprint.performed += p => ToggleSprint();
         inputSystem.Character.SprintRelease.performed += p => StopSprint();
+        inputSystem.Character.Setting.performed += p => SettingPage();
 
         inputSystem.Weapon.Fire2Press.performed += p => AimingPressed();
         inputSystem.Weapon.Fire2Release.performed += p => AimingReleased();
@@ -95,14 +100,21 @@ public class scr_CharacterController : MonoBehaviour
         newCharacterRotation = transform.localRotation.eulerAngles;
         cameraHeight = cameraTransform.localPosition.y;
 
+        isSetting = false;
+
         if (currentWeapon)
         {
             currentWeapon.Initialise(this);
         }
-
     }
 
-    private void Update()
+    void Start()
+    {
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+    }
+
+     void Update()
     {
         CalculateJump();
         CalculateState();
@@ -119,7 +131,6 @@ public class scr_CharacterController : MonoBehaviour
     }
 
     #region -- 方法 --
-
     /// <summary>
     /// 判斷是否可以站起來
     /// </summary>
@@ -138,6 +149,8 @@ public class scr_CharacterController : MonoBehaviour
     /// </summary>
     private void Move()
     {
+        if (isSetting) return;
+
         if (input_Movement.y <= 0.2f)
         {
             isSprint = false;
@@ -194,6 +207,8 @@ public class scr_CharacterController : MonoBehaviour
     /// </summary>
     private void View()
     {
+        if (isSetting) return;
+
         newCharacterRotation.y += playerdata.ViewX_Sensitivity * (playerdata.ViewX_inverted ? -input_View.x : input_View.x) * Time.deltaTime;
         transform.localRotation = Quaternion.Euler(newCharacterRotation);
 
@@ -208,6 +223,8 @@ public class scr_CharacterController : MonoBehaviour
     /// </summary>
     private void CalculateJump()
     {
+        if (isSetting) return;
+
         if (playerGravity > gravity_Min)
         {
             playerGravity -= gravityValue * Time.deltaTime;
@@ -402,6 +419,16 @@ public class scr_CharacterController : MonoBehaviour
         currentWeapon.isAiming = isAiming;
 
     }
-
     #endregion
+
+    private void SettingPage()
+    {
+        isSetting = !isSetting;
+
+        settingPage.SetActive(isSetting);
+        Cursor.visible = isSetting;
+
+        if (isSetting) Cursor.lockState = CursorLockMode.None;
+        else if (!isSetting) Cursor.lockState = CursorLockMode.Locked;
+    }
 }
