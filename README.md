@@ -1,2 +1,6 @@
-# Unity_3D_FPS_SimpleGame
-Unity 3D 第一人稱射擊遊戲
+# This is 3D game made in Unity 2019.4.26f1  
+
+## Control  
+WASD : Control player's movement  
+leftmouse : Shoot  
+
